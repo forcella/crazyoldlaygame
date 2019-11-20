@@ -9,10 +9,12 @@ def draw_board(size):
     for column in range(size):
         line_array = []
         for line in range(size):
-            line_array.append(line)
+            line_array.append(Position(column + 1, line + 1, None))
         board_matrix.append(line_array)
 
-    print(board_matrix)
+    for line in board_matrix:
+        for col in line:
+            print(col)
 
 
 def print_info():
@@ -22,6 +24,11 @@ def print_info():
 
 
 def check_winner(plays, board):
+    if plays > 2 * plays:
+        return "vai"
+
+
+def player_request(plays, board):
     if plays > 2 * plays:
         return "vai"
 
