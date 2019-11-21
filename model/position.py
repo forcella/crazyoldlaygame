@@ -1,8 +1,8 @@
 class Position:
-    def __init__(self, column, line, player):
+    def __init__(self, column, line, player="--"):
         self.column = column
         self.line = line
         self.player = player
 
-    def __str__(self):
-        return str(self.__dict__)
+    def empty(self):
+        return self.player.__eq__('--')
