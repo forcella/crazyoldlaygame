@@ -4,8 +4,6 @@ from model.position import Position
 
 
 def generate_board(size):
-    # print("\n" * 130)
-
     board_matrix = []
 
     for line in range(size):
@@ -36,6 +34,11 @@ def draw_board(board):
 
 
 def menu():
+    fast = False
+    if fast:
+        board = generate_board(3)
+        return Game([Player("p1"), Player("p2")], board)
+
     players = []
     print('''Entre respectivamente o tamanho da quadra que voce quer usar, um valor de 3 a 10, 
     e o qantidade de jogadores que vao jogar. Minimo 2, maximo 5, para sair digite sair a qualquer momento''')
@@ -44,7 +47,6 @@ def menu():
         board_size = int(input('Tamanho do tabuleiro: '))
         if 2 < board_size <= 10:
             break
-
     while True:
         pos = len(players)
         player_name = input('Nome do jogador ' + (pos + 1).__str__() + ": ")
@@ -93,13 +95,149 @@ def play(game, turn):
 
 
 def check_for_winner(plays: int, board, position: Position):
-    if plays >= 99:  # checar vencedor retornor postion com o nome do vencedor
-        return position
+    if plays >= 3:
+        if right_and_left_check(board, position) or up_and_down_check(board, position) \
+                or plus_sing_check(board, position) or x_sing_check(board, position) \
+                or vertical_check(board, position):
+            return position
+        else:
+            Position(0, 0)
 
     elif plays >= (len(board) * len(board)):
         return Position(0, 0, None)
 
     return Position(0, 0)
+
+
+def vertical_check(board, position: Position):
+    y = position.col - 1
+    x = position.line - 1
+    # vertical down right
+    try:
+        first_position: Position = board[x + 1][y + 1]
+        second_position: Position = board[x + 2][y + 2]
+        if position.check_player_eq(first_position, second_position):
+            return True
+    except IndexError:
+        pass
+
+    # vertical down left
+    try:
+        first_position: Position = board[x + 1][(y - 1) - len(board)]
+        second_position: Position = board[x + 2][(y - 2) - len(board)]
+        if position.check_player_eq(first_position, second_position):
+            return True
+    except IndexError:
+        pass
+
+    # vertical up left
+    try:
+        first_position: Position = board[(x - 1) - len(board)][(y - 1) - len(board)]
+        second_position: Position = board[(x - 2 - len(board))][(y - 2) - len(board)]
+
+        if position.check_player_eq(first_position, second_position):
+            return True
+    except IndexError:
+        pass
+
+    # Vertical up right
+    try:
+        first_position: Position = board[(x - 1) - len(board)][y + 1]
+        second_position: Position = board[(x - 2) - len(board)][y + 2]
+
+        if position.check_player_eq(first_position, second_position):
+            return True
+    except IndexError:
+        pass
+
+    return False
+
+
+def x_sing_check(board, position: Position):
+    y = position.col - 1
+    x = position.line - 1
+    try:
+        first_position: Position = board[(x - 1) - len(board)][(y - 1) - len(board)]
+        second_position: Position = board[x + 1][y + 1]
+
+        if position.check_player_eq(first_position, second_position):
+            return True
+    except IndexError:
+        pass
+
+    try:
+        first_position: Position = board[(x - 1) - len(board)][y + 1]
+        second_position: Position = board[x + 1][(y - 1) - len(board)]
+
+        if position.check_player_eq(first_position, second_position):
+            return True
+    except IndexError:
+        pass
+
+    return False
+
+
+def plus_sing_check(board, position: Position):
+    y = position.col - 1
+    x = position.line - 1
+    try:
+        first_position: Position = board[x + 1][y]
+        second_position: Position = board[(x - 1) - len(board)][y]
+        if position.check_player_eq(first_position, second_position):
+            return True
+    except IndexError:
+        pass
+    try:
+        first_position: Position = board[x][(y - 1) - len(board)]
+        second_position: Position = board[x][y + 1]
+        if position.check_player_eq(first_position, second_position):
+            return True
+    except IndexError:
+        pass
+    return False
+
+
+def right_and_left_check(board, position: Position):
+    y = position.col - 1
+    x = position.line - 1
+
+    try:
+        first_position: Position = board[x][y + 1]
+        second_position: Position = board[x][y + 2]
+        if position.check_player_eq(first_position, second_position):
+            return True
+    except IndexError:
+        pass
+
+    try:
+        first_position: Position = board[x][(y - 1) - len(board)]
+        second_position: Position = board[x][(y - 2) - len(board)]
+        if position.check_player_eq(first_position, second_position):
+            return True
+    except IndexError:
+        pass
+
+    return False
+
+
+def up_and_down_check(board, position: Position):
+    y = position.col - 1
+    x = position.line - 1
+    try:
+        first_position: Position = board[(x - 1) - len(board)][y]
+        second_position: Position = board[(x - 2) - len(board)][y]
+        if position.check_player_eq(first_position, second_position):
+            return True
+    except IndexError:
+        pass
+    try:
+        first_position: Position = board[x + 1][y]
+        second_position: Position = board[x + 2][y]
+        if position.check_player_eq(first_position, second_position):
+            return True
+    except IndexError:
+        pass
+    return False
 
 
 def begin(game):
@@ -111,7 +249,7 @@ def begin(game):
         player = game.players[turn]
         print("Vez do Jogador: " + player.name)
         draw_board(game.board)
-        [board, position] = play(game, turn)
+        [_board, position] = play(game, turn)
         if turn < len(game.players) - 1:
             turn += 1
         else:
@@ -125,7 +263,8 @@ def begin(game):
             break
         elif not wining_position.empty():
             draw_board(game.board)
-            print("ganhou")
+            print("Jogador: {} Ganhou a partida!!!".format(player.name))
+            input("presione qualquer tecla para continuar...")
             break
     new_game()
 
